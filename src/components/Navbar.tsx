@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Award, Menu, X, LogOut } from "lucide-react";
+import { Film, Award, Menu, X, LogOut, Search, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -45,6 +45,16 @@ const Navbar = () => {
             <Film className="h-8 w-8" />
             <span className="text-xl font-bold">CineTicket</span>
           </Link>
+
+          {/* Center Section - Search & Location */}
+          <div className="hidden md:flex items-center space-x-2">
+            <Button variant="ghost" size="icon">
+              <Search className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MapPin className="h-5 w-5" />
+            </Button>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
