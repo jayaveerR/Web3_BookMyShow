@@ -10,7 +10,9 @@ import TicketTransfer from "./pages/TicketTransfer";
 import TicketScanner from "./pages/TicketScanner";
 import BookingHistory from "./pages/BookingHistory";
 import TicketSuccess from "./pages/TicketSuccess";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -21,13 +23,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/movie/:id" element={<MovieDetails />} />
-          <Route path="/rewards" element={<Rewards />} />
-          <Route path="/transfer" element={<TicketTransfer />} />
-          <Route path="/scanner" element={<TicketScanner />} />
-          <Route path="/history" element={<BookingHistory />} />
-          <Route path="/ticket-success" element={<TicketSuccess />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/movie/:id" element={<ProtectedRoute><MovieDetails /></ProtectedRoute>} />
+          <Route path="/rewards" element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
+          <Route path="/transfer" element={<ProtectedRoute><TicketTransfer /></ProtectedRoute>} />
+          <Route path="/scanner" element={<ProtectedRoute><TicketScanner /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
+          <Route path="/ticket-success" element={<ProtectedRoute><TicketSuccess /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

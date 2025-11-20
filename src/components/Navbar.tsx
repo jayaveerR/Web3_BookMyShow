@@ -1,23 +1,39 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Award, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Film, Award, Menu, X, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleWalletConnect = () => {
-    // Mock wallet connection - in production, integrate with Petra Wallet
-    if (!isConnected) {
-      const mockAddress = "0x12a...89f";
-      setWalletAddress(mockAddress);
+  // Check wallet connection status on mount
+  useEffect(() => {
+    const connected = localStorage.getItem("isWalletConnected") === "true";
+    const address = localStorage.getItem("walletAddress");
+    if (connected && address) {
       setIsConnected(true);
-    } else {
-      setIsConnected(false);
-      setWalletAddress("");
+      setWalletAddress(address);
     }
+  }, []);
+
+  const handleWalletConnect = () => {
+    if (!isConnected) {
+      // Redirect to login page
+      navigate("/login");
+    }
+  };
+
+  const handleDisconnect = () => {
+    localStorage.removeItem("walletAddress");
+    localStorage.removeItem("isWalletConnected");
+    setIsConnected(false);
+    setWalletAddress("");
+    toast.success("Wallet disconnected");
+    navigate("/login");
   };
 
   return (
@@ -32,20 +48,38 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/rewards">
-              <Button variant="default" className="flex items-center space-x-2">
-                <Award className="h-4 w-4" />
-                <span>Rewards</span>
-              </Button>
-            </Link>
+            {isConnected && (
+              <Link to="/rewards">
+                <Button variant="default" className="flex items-center space-x-2">
+                  <Award className="h-4 w-4" />
+                  <span>Rewards</span>
+                </Button>
+              </Link>
+            )}
             
-            <Button 
-              variant="outline" 
-              onClick={handleWalletConnect}
-              className="min-w-[160px]"
-            >
-              {isConnected ? walletAddress : "Connect Petra Wallet"}
-            </Button>
+            {isConnected ? (
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" className="min-w-[140px]">
+                  {walletAddress}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={handleDisconnect}
+                  title="Disconnect Wallet"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={handleWalletConnect}
+                className="min-w-[160px]"
+              >
+                Connect Petra Wallet
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -60,20 +94,44 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 space-y-3 border-t border-border">
-            <Link to="/rewards" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="default" className="w-full flex items-center justify-center space-x-2">
-                <Award className="h-4 w-4" />
-                <span>Rewards</span>
-              </Button>
-            </Link>
+            {isConnected && (
+              <Link to="/rewards" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="default" className="w-full flex items-center justify-center space-x-2">
+                  <Award className="h-4 w-4" />
+                  <span>Rewards</span>
+                </Button>
+              </Link>
+            )}
             
-            <Button 
-              variant="outline" 
-              onClick={handleWalletConnect}
-              className="w-full"
-            >
-              {isConnected ? walletAddress : "Connect Petra Wallet"}
-            </Button>
+            {isConnected ? (
+              <>
+                <Button variant="outline" className="w-full">
+                  {walletAddress}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    handleDisconnect();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Disconnect</span>
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  handleWalletConnect();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full"
+              >
+                Connect Petra Wallet
+              </Button>
+            )}
           </div>
         )}
       </div>
