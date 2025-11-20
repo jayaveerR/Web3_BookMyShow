@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,9 +11,12 @@ const showTimings = ["10:00 AM", "2:00 PM", "6:00 PM", "9:00 PM"];
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const handlePayment = () => {
-    // Mock payment - in production, integrate with Petra Wallet
+    if (!selectedTime) return;
+    // Store selected time in localStorage for ticket success page
+    localStorage.setItem("selectedShowTime", selectedTime);
     navigate("/ticket-success");
   };
 
@@ -73,8 +77,9 @@ const MovieDetails = () => {
                 {showTimings.map((time) => (
                   <Button
                     key={time}
-                    variant="outline"
+                    variant={selectedTime === time ? "default" : "outline"}
                     className="h-12 hover:bg-cinema-hover"
+                    onClick={() => setSelectedTime(time)}
                   >
                     {time}
                   </Button>
@@ -92,6 +97,7 @@ const MovieDetails = () => {
               <Button
                 className="w-full h-12 text-lg"
                 onClick={handlePayment}
+                disabled={!selectedTime}
               >
                 Continue to Payment
               </Button>
