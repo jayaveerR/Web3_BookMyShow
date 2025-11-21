@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Languages, Film } from "lucide-react";
-import movie1 from "@/assets/movie-1.jpg";
+import { movies } from "@/data/movies";
+import { toast } from "sonner";
 
 const showTimings = ["10:00 AM", "2:00 PM", "6:00 PM", "9:00 PM"];
 
@@ -13,24 +14,35 @@ const MovieDetails = () => {
   const navigate = useNavigate();
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
+  const movie = movies.find(m => m.id === Number(id));
+
+  useEffect(() => {
+    if (!movie) {
+      toast.error("Movie not found");
+      navigate("/");
+    }
+  }, [movie, navigate]);
+
+  if (!movie) return null;
+
   const handlePayment = () => {
     if (!selectedTime) return;
     // Store selected time in localStorage for ticket success page
     localStorage.setItem("selectedShowTime", selectedTime);
-    navigate("/ticket-success");
+    navigate(`/seat/${id}`);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Movie Poster */}
           <div className="relative">
             <img
-              src={movie1}
-              alt="Movie poster"
+              src={movie.poster}
+              alt={movie.title}
               className="w-full rounded-lg shadow-lg"
             />
           </div>
@@ -39,19 +51,19 @@ const MovieDetails = () => {
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Shadow Warriors
+                {movie.title}
               </h1>
               <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Film className="h-4 w-4" />
-                  Action • Thriller
+                  {movie.genre}
                 </span>
                 <span className="flex items-center gap-1">
                   <Languages className="h-4 w-4" />
-                  Telugu
+                  {movie.language}
                 </span>
                 <span className="flex items-center gap-1">
-                  2D
+                  {movie.format}
                 </span>
               </div>
             </div>
@@ -91,17 +103,17 @@ const MovieDetails = () => {
             <div className="pt-4 border-t border-border">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-muted-foreground">Ticket Price</span>
-                <span className="text-2xl font-bold text-cinema-price">2 APT</span>
+                <span className="text-2xl font-bold text-cinema-price">{movie.price}</span>
               </div>
-              
+
               <Button
                 className="w-full h-12 text-lg"
                 onClick={handlePayment}
                 disabled={!selectedTime}
               >
-                Continue to Payment
+                Book Tickets
               </Button>
-              
+
               <p className="text-xs text-muted-foreground text-center mt-2">
                 You'll be prompted to connect Petra Wallet
               </p>
@@ -113,10 +125,7 @@ const MovieDetails = () => {
         <div className="mt-12">
           <h3 className="text-xl font-semibold text-foreground mb-4">Synopsis</h3>
           <p className="text-muted-foreground leading-relaxed">
-            In a world torn apart by conflict, an elite team of warriors must band together 
-            to stop an ancient threat from destroying everything they hold dear. With stunning 
-            action sequences and heart-pounding suspense, Shadow Warriors takes you on an 
-            unforgettable journey of courage, sacrifice, and redemption.
+            {movie.description}
           </p>
         </div>
       </div>

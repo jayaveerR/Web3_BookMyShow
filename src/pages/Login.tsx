@@ -18,31 +18,31 @@ const Login = () => {
 
   const handleConnectWallet = async () => {
     setIsConnecting(true);
-    
+
     try {
-      // Mock Petra Wallet connection - in production, integrate with actual Petra SDK
-      // const petra = (window as any).aptos;
-      // if (!petra) {
-      //   toast.error("Petra Wallet not found. Please install it first.");
-      //   return;
-      // }
-      // const response = await petra.connect();
-      // const address = response.address;
-      
-      // Mock connection for demonstration
-      setTimeout(() => {
-        const mockAddress = "0x" + Math.random().toString(16).slice(2, 10) + "..." + Math.random().toString(16).slice(2, 5);
-        localStorage.setItem("walletAddress", mockAddress);
-        localStorage.setItem("isWalletConnected", "true");
-        
-        toast.success("Wallet Connected Successfully!", {
-          description: `Address: ${mockAddress}`,
-        });
-        
-        // Redirect to homepage
-        navigate("/");
-      }, 1500);
+      // Integrated Petra Wallet connection
+      const petra = (window as any).aptos;
+      if (!petra) {
+        toast.error("Petra Wallet not found. Please install it first.");
+        window.open("https://petra.app/", "_blank");
+        setIsConnecting(false);
+        return;
+      }
+
+      const response = await petra.connect();
+      const address = response.address;
+
+      localStorage.setItem("walletAddress", address);
+      localStorage.setItem("isWalletConnected", "true");
+
+      toast.success("Wallet Connected Successfully!", {
+        description: `Address: ${address.slice(0, 6)}...${address.slice(-4)}`,
+      });
+
+      // Redirect to homepage
+      navigate("/");
     } catch (error) {
+      console.error("Wallet connection error:", error);
       toast.error("Failed to connect wallet. Please try again.");
       setIsConnecting(false);
     }
@@ -56,11 +56,11 @@ const Login = () => {
           <div className="flex items-center justify-center mb-6">
             <Film className="h-16 w-16 text-foreground" />
           </div>
-          
+
           <h1 className="text-4xl font-bold text-foreground mb-3">
             BookMyShow Web3
           </h1>
-          
+
           <div className="flex items-center justify-center space-x-2 mb-2">
             <div className="h-px w-12 bg-border"></div>
             <p className="text-lg text-muted-foreground font-medium">
@@ -68,7 +68,7 @@ const Login = () => {
             </p>
             <div className="h-px w-12 bg-border"></div>
           </div>
-          
+
           <p className="text-sm text-muted-foreground">
             Mangalagiri • NFT Tickets on Aptos
           </p>

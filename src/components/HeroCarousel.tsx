@@ -5,24 +5,25 @@ import { useNavigate } from "react-router-dom";
 import heroMovie1 from "@/assets/hero-movie-1.jpg";
 import heroMovie2 from "@/assets/hero-movie-2.jpg";
 import heroMovie3 from "@/assets/hero-movie-3.jpg";
-
+import spiderman from "@/assets/Spider-man.png";
+import Anime from "@/assets/Anime.jpg";
+import panda from "@/assets/panda.jpg";
 const carouselItems = [
   {
     id: 1,
-    image: heroMovie1,
-    title: "Blockbuster Action",
+    image: panda,
+    title: "Panda",
     description: "Experience the thrill"
   },
   {
     id: 2,
-    image: heroMovie2,
-    title: "Romantic Drama",
-    description: "A story of love"
+    image: spiderman,
+
   },
   {
     id: 3,
-    image: heroMovie3,
-    title: "Sci-Fi Thriller",
+    image: Anime,
+    title: "Anime",
     description: "Beyond imagination"
   }
 ];
@@ -48,7 +49,7 @@ const HeroCarousel = () => {
   };
 
   return (
-    <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden bg-cinema-hero">
+    <div className="relative w-full max-w-7xl mx-auto h-[50vh] md:h-[60vh] lg:h-[85vh] overflow-hidden bg-cinema-hero rounded-2xl mt-4">
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-500 ease-out"
@@ -103,9 +104,8 @@ const HeroCarousel = () => {
         {carouselItems.map((_, index) => (
           <button
             key={index}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentSlide ? "bg-white w-8" : "bg-white/50"
-            }`}
+            className={`w-2 h-2 rounded-full transition-all ${index === currentSlide ? "bg-white w-8" : "bg-white/50"
+              }`}
             onClick={() => setCurrentSlide(index)}
           />
         ))}

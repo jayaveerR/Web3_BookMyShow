@@ -8,20 +8,24 @@ import movie1 from "@/assets/movie-1.jpg";
 
 const TicketSuccess = () => {
   const navigate = useNavigate();
-  const [showTime, setShowTime] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
+  const [ticketData, setTicketData] = useState<any>(null);
 
   useEffect(() => {
-    const savedTime = localStorage.getItem("selectedShowTime") || "6:00 PM";
-    const wallet = localStorage.getItem("walletConnected") || "0x12a...89f";
-    setShowTime(savedTime);
-    setWalletAddress(wallet);
+    const data = sessionStorage.getItem("ticketData");
+    if (data) {
+      setTicketData(JSON.parse(data));
+    } else {
+      // Fallback or redirect if no data
+      // navigate("/"); 
+    }
   }, []);
+
+  if (!ticketData) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-8">
           <CheckCircle className="h-20 w-20 mx-auto mb-4 text-green-600" />
@@ -37,64 +41,83 @@ const TicketSuccess = () => {
         <div className="bg-card rounded-lg border-2 border-border overflow-hidden mb-6">
           <div className="grid md:grid-cols-2">
             {/* Left Side - Movie Poster */}
-            <div className="relative">
+            <div className="relative h-full min-h-[500px] bg-black flex items-center justify-center overflow-hidden">
               <img
-                src={movie1}
-                alt="Shadow Warriors"
-                className="w-full h-full object-cover"
+                src={ticketData.moviePoster || movie1}
+                alt={ticketData.movieTitle}
+                className="w-full h-full object-contain"
               />
             </div>
 
             {/* Right Side - Ticket Details */}
-            <div className="p-6 space-y-4">
-              <div className="bg-gradient-to-br from-cinema-hero to-secondary p-4 rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-1">NFT Ticket ID</p>
-                <p className="text-lg font-mono font-bold text-foreground">
-                  #NFT-2025-00123
-                </p>
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <div>
-                  <p className="text-muted-foreground mb-1">Movie</p>
-                  <p className="font-semibold text-foreground text-lg">Shadow Warriors</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Theatre</p>
-                  <p className="font-semibold text-foreground">Annapurna Theatre, Mangalagiri</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-muted-foreground mb-1">Date</p>
-                    <p className="font-semibold text-foreground">Jan 20, 2025</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground mb-1">Show Time</p>
-                    <p className="font-semibold text-foreground">{showTime}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Wallet Address</p>
-                  <p className="font-mono text-xs font-semibold text-foreground break-all">
-                    {walletAddress}
+            <div className="p-8 flex flex-col justify-between bg-white">
+              <div>
+                <div className="bg-gradient-to-br from-cinema-hero to-secondary p-4 rounded-lg text-center mb-6">
+                  <p className="text-sm text-muted-foreground mb-1">NFT Ticket ID</p>
+                  <p className="text-lg font-mono font-bold text-foreground">
+                    #NFT-2025-{Math.floor(Math.random() * 10000)}
                   </p>
                 </div>
-                <div className="pt-3 border-t border-border">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Amount Paid</span>
-                    <span className="text-2xl font-bold text-cinema-price">2 APT</span>
+
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground mb-1">Movie</p>
+                    <p className="font-bold text-foreground text-xl">{ticketData.movieTitle}</p>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <p className="text-muted-foreground mb-1">Theatre</p>
+                      <p className="font-semibold text-foreground">{ticketData.location}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-muted-foreground mb-1">Date</p>
+                      <p className="font-semibold text-foreground">{ticketData.date}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-muted-foreground mb-1">Show Time</p>
+                      <p className="font-semibold text-foreground">{ticketData.time}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-muted-foreground mb-1">Seats</p>
+                    <div className="flex flex-wrap gap-2">
+                      {ticketData.seats?.map((s: any) => (
+                        <span key={s.id} className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium">
+                          {s.id}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-muted-foreground mb-1">Wallet Address</p>
+                    <p className="font-mono text-xs font-semibold text-foreground break-all">
+                      {ticketData.wallet}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-border mt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Amount Paid</span>
+                      <span className="text-3xl font-bold text-cinema-price">{ticketData.totalApt} APT</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* QR Code */}
-              <div className="bg-cinema-hero p-6 rounded-lg text-center border border-border">
-                <div className="w-32 h-32 mx-auto bg-white rounded-lg flex items-center justify-center border-2 border-border">
-                  <p className="text-sm text-muted-foreground">QR Code</p>
+              <div className="mt-6 text-center">
+                <div className="inline-block p-2 bg-white border border-gray-200 rounded-lg">
+                  <div className="w-24 h-24 bg-gray-900 flex items-center justify-center text-white text-xs">
+                    [QR CODE]
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Show at theatre entrance
-                </p>
+                <p className="text-xs text-muted-foreground mt-2">Scan at entrance</p>
               </div>
             </div>
           </div>
@@ -106,18 +129,18 @@ const TicketSuccess = () => {
             <Ticket className="h-4 w-4 mr-2" />
             NFT Mint
           </Button>
-          
+
           <Button className="h-12" variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Download
           </Button>
-          
+
           <Button className="h-12" variant="outline">
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
-          
-          <Button 
+
+          <Button
             className="h-12"
             variant="outline"
             onClick={() => navigate("/history")}
