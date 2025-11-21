@@ -5,6 +5,8 @@ import { movies } from "@/data/movies";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Ticket, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { uploadFileToIPFS, uploadJSONToIPFS } from "@/utils/ipfs";
+import { getCurrentDateIST } from "@/utils/date";
 
 const UserDetails = () => {
     const navigate = useNavigate();
@@ -27,23 +29,83 @@ const UserDetails = () => {
         }
     }, [navigate]);
 
-    const handleMint = () => {
-        // Save final ticket data to sessionStorage for the success page
-        const ticketData = {
-            ...bookingData,
-            movieTitle: movie?.title,
-            moviePoster: movie?.poster,
-            location: movie?.location,
-            date: "Jan 20, 2025",
-            time: localStorage.getItem("selectedShowTime") || "6:00 PM",
-            wallet: walletAddress,
-        };
-        sessionStorage.setItem("ticketData", JSON.stringify(ticketData));
+    const handleMint = async () => {
+        const aptos = (window as any).aptos;
+        if (!aptos) {
+            toast.error("Petra Wallet not found!");
+            return;
+        }
 
-        toast.success("Minting Successful! Redirecting...");
-        setTimeout(() => {
-            navigate("/ticket-success");
-        }, 1500);
+        if (!movie || !bookingData) return;
+
+        try {
+            toast.loading("Uploading to IPFS...");
+
+            // 1. Upload Image to IPFS
+            const response = await fetch(movie.poster);
+            const blob = await response.blob();
+            const imageIpfsUrl = await uploadFileToIPFS(blob);
+            console.log("Image uploaded to IPFS:", imageIpfsUrl);
+
+            // 2. Create Metadata
+            const seatsString = bookingData.seats.map((s: any) => `${s.id}`).join(", ");
+            const time = localStorage.getItem("selectedShowTime") || "6:00 PM";
+            const date = getCurrentDateIST();
+
+            const metadata = {
+                name: `${movie.title} Ticket`,
+                description: `Ticket for ${movie.title} at ${movie.location} on ${date} ${time}. Seats: ${seatsString}`,
+                image: imageIpfsUrl
+            };
+
+            // 3. Upload Metadata to IPFS
+            const metadataIpfsUrl = await uploadJSONToIPFS(metadata);
+            console.log("Metadata uploaded to IPFS:", metadataIpfsUrl);
+            toast.dismiss();
+
+            // 4. Mint NFT
+            const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
+
+            const transaction = {
+                function: `${moduleAddress}::NftMintV3::mint_ticket`,
+                type_arguments: [],
+                arguments: [
+                    movie.title,       // movie_name
+                    movie.location,    // location
+                    date,              // date
+                    time,              // time
+                    seatsString,       // seats
+                    metadataIpfsUrl    // poster_url (now passing metadata URI)
+                ],
+            };
+
+            const pendingTransaction = await aptos.signAndSubmitTransaction(transaction);
+            console.log("Mint Transaction Pending:", pendingTransaction);
+
+            // Save final ticket data to sessionStorage for the success page
+            const ticketData = {
+                ...bookingData,
+                movieTitle: movie.title,
+                moviePoster: movie.poster,
+                location: movie.location,
+                date: date,
+                time: time,
+                wallet: walletAddress,
+                txnHash: pendingTransaction.hash,
+                nftMetadata: metadataIpfsUrl
+            };
+            sessionStorage.setItem("ticketData", JSON.stringify(ticketData));
+
+            toast.success("Minting Successful! Redirecting...");
+            setTimeout(() => {
+                navigate("/ticket-success");
+            }, 1500);
+
+        } catch (error) {
+            console.error("Minting failed", error);
+            toast.dismiss();
+            toast.error("Minting Failed! Please try again.");
+        }
     };
 
     if (!bookingData || !movie) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -94,7 +156,7 @@ const UserDetails = () => {
                                             <Calendar className="w-6 h-6 text-black mt-1" />
                                             <div>
                                                 <p className="text-sm text-gray-500">Date</p>
-                                                <p className="font-semibold text-lg">Jan 20, 2025</p>
+                                                <p className="font-semibold text-lg">{getCurrentDateIST()}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-start gap-4">

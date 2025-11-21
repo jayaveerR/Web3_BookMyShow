@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { movies } from "../data/movies";
+import { getCurrentDateIST } from "@/utils/date";
 
 // ================= SECTION DATA =================
 interface Section {
@@ -140,7 +142,7 @@ export default function BookingFlow() {
                         section: section.name,
                         price: section.apt,
                     };
-                }),
+                })
             );
         });
         setSeats(generatedSeats);
@@ -175,13 +177,6 @@ export default function BookingFlow() {
 
     const totalApt = selectedSeats.reduce((sum, s) => sum + s.price, 0);
 
-    // Helper to convert string to hex
-    const stringToHex = (str: string) => {
-        return Array.from(new TextEncoder().encode(str))
-            .map((b) => b.toString(16).padStart(2, "0"))
-            .join("");
-    };
-
     const handlePayAndContinue = async () => {
         if (selectedSeats.length === 0) {
             setShowAlert("Please select at least 1 seat 🚨");
@@ -207,23 +202,22 @@ export default function BookingFlow() {
             const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
             const treasuryAddress = "0x7d467845ae28ea6b0adf38546c6fd0a1ba70733ed825a10c32d5a456bedb7d46";
 
-            // Get movie details (mock or fetch if available, for now using placeholders/props if not passed)
-            // Ideally we should fetch from movies.ts but for now we use the ID or a placeholder
-            const movieName = "Movie Title"; // TODO: Fetch actual title
-            const location = "Mangalagiri"; // Default location from Navbar
-            const date = new Date().toLocaleDateString(); // Current date
+            // Get movie details
+            const movie = movies.find((m) => m.id === Number(id));
+            const movieName = movie ? movie.title : "Unknown Movie";
+            const location = movie ? movie.location : "Annapurna Theatre, Mangalagiri"; // Default fallback
+            const date = getCurrentDateIST();
 
             const transaction = {
-                function: `${moduleAddress}::TicketBooking::book_ticket_v3`,
+                function: `${moduleAddress}::TicketBooking::book_ticket_v5`,
                 type_arguments: [],
                 arguments: [
-                    treasuryAddress,
-                    id || "unknown", // movie_id
                     movieName,       // movie_name
+                    treasuryAddress, // treasury_address
                     location,        // location
                     date,            // date
                     seatNumbers,     // seat_number
-                    priceInOctas.toString()       // price
+                    priceInOctas.toString() // price
                 ],
             };
 
