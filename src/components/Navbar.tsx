@@ -1,9 +1,15 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap } from "lucide-react";
+import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap, Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -37,6 +43,13 @@ const Navbar = () => {
     setWalletAddress("");
     toast.success("Wallet disconnected");
     navigate("/login");
+  };
+
+  const handleCopyAddress = () => {
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress);
+      toast.success("Address copied");
+    }
   };
 
   const formatAddress = (address: string) => {
@@ -118,19 +131,23 @@ const Navbar = () => {
             )}
 
             {isConnected ? (
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" className="min-w-[140px]">
-                  {formatAddress(walletAddress)}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleDisconnect}
-                  title="Disconnect Wallet"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="min-w-[140px]">
+                    {formatAddress(walletAddress)}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">
+                    <Copy className="mr-2 h-4 w-4" />
+                    <span>Copy Address</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDisconnect} className="cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Disconnect</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button
                 variant="outline"
@@ -199,20 +216,23 @@ const Navbar = () => {
 
             {isConnected ? (
               <>
-                <Button variant="outline" className="w-full">
-                  {formatAddress(walletAddress)}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    handleDisconnect();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center space-x-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Disconnect</span>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      {formatAddress(walletAddress)}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={handleCopyAddress} className="cursor-pointer">
+                      <Copy className="mr-2 h-4 w-4" />
+                      <span>Copy Address</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDisconnect} className="cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Disconnect</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Button

@@ -175,20 +175,76 @@ export default function BookingFlow() {
 
     const totalApt = selectedSeats.reduce((sum, s) => sum + s.price, 0);
 
-    const handlePayAndContinue = () => {
+    // Helper to convert string to hex
+    const stringToHex = (str: string) => {
+        return Array.from(new TextEncoder().encode(str))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+    };
+
+    const handlePayAndContinue = async () => {
         if (selectedSeats.length === 0) {
             setShowAlert("Please select at least 1 seat 🚨");
             setTimeout(() => setShowAlert(null), 2000);
             return;
         }
-        const seatsWithPrice = selectedSeats.map((seat) => ({
-            section: seat.section,
-            id: seat.id,
-            price: seat.price,
-        }));
-        const data = { seats: seatsWithPrice, totalApt, movieId: id };
-        sessionStorage.setItem("bookingData", JSON.stringify(data));
-        navigate("/userdetails");
+
+        // Check if Petra wallet is present
+        const aptos = (window as any).aptos;
+        if (!aptos) {
+            setShowAlert("Petra Wallet not found! 🚫");
+            setTimeout(() => setShowAlert(null), 2000);
+            window.open("https://petra.app/", "_blank");
+            return;
+        }
+
+        try {
+            const seatNumbers = selectedSeats.map(s => s.id).join(",");
+            // 1 APT = 100,000,000 Octas
+            const priceInOctas = totalApt * 100_000_000;
+
+            // Smart Contract Details
+            const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
+            const treasuryAddress = "0x7d467845ae28ea6b0adf38546c6fd0a1ba70733ed825a10c32d5a456bedb7d46";
+
+            // Get movie details (mock or fetch if available, for now using placeholders/props if not passed)
+            // Ideally we should fetch from movies.ts but for now we use the ID or a placeholder
+            const movieName = "Movie Title"; // TODO: Fetch actual title
+            const location = "Mangalagiri"; // Default location from Navbar
+            const date = new Date().toLocaleDateString(); // Current date
+
+            const transaction = {
+                function: `${moduleAddress}::TicketBooking::book_ticket_v3`,
+                type_arguments: [],
+                arguments: [
+                    treasuryAddress,
+                    id || "unknown", // movie_id
+                    movieName,       // movie_name
+                    location,        // location
+                    date,            // date
+                    seatNumbers,     // seat_number
+                    priceInOctas.toString()       // price
+                ],
+            };
+
+            const pendingTransaction = await aptos.signAndSubmitTransaction(transaction);
+            console.log("Transaction Pending:", pendingTransaction);
+
+            // Optimistically proceed or wait for confirmation (here we proceed)
+            const seatsWithPrice = selectedSeats.map((seat) => ({
+                section: seat.section,
+                id: seat.id,
+                price: seat.price,
+            }));
+            const data = { seats: seatsWithPrice, totalApt, movieId: id, txnHash: pendingTransaction.hash };
+            sessionStorage.setItem("bookingData", JSON.stringify(data));
+            navigate("/userdetails");
+
+        } catch (error) {
+            console.error("Transaction failed", error);
+            setShowAlert("Transaction Failed ❌");
+            setTimeout(() => setShowAlert(null), 2000);
+        }
     };
 
     return (
@@ -297,7 +353,7 @@ export default function BookingFlow() {
                     <div className="mt-6 mb-10">
                         <button
                             onClick={handlePayAndContinue}
-                            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg text-lg font-semibold shadow-lg transition-transform transform active:scale-95"
+                            className="w-full border border-black text-black py-3 rounded-lg text-lg font-semibold shadow-lg transition-transform transform active:scale-95"
                         >
                             Pay {totalApt} APT | Continue
                         </button>
@@ -312,7 +368,7 @@ export default function BookingFlow() {
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 50, opacity: 0 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg shadow"
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-lg shadow"
                     >
                         {showAlert}
                     </motion.div>
