@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Seat from "./pages/Seat";
 import UserDetails from "./pages/UserDetails";
+import Refund from "./pages/Refund";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/scanner" element={<ProtectedRoute><TicketScanner /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
           <Route path="/ticket-success" element={<ProtectedRoute><TicketSuccess /></ProtectedRoute>} />
+          <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

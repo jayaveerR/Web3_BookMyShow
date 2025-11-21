@@ -2,12 +2,20 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Award, Gift, Star, Ticket } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const Rewards = () => {
+  const [rewardBalance, setRewardBalance] = useState("0");
+
+  useEffect(() => {
+    const rewards = localStorage.getItem("userRewards") || "0";
+    setRewardBalance(rewards);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <Award className="h-16 w-16 mx-auto mb-4 text-cinema-price" />
@@ -21,9 +29,9 @@ const Rewards = () => {
 
         {/* Current Points */}
         <div className="bg-gradient-to-br from-cinema-hero to-secondary p-8 rounded-lg border border-border mb-8 text-center">
-          <p className="text-sm text-muted-foreground mb-2">Your Reward Points</p>
-          <p className="text-5xl font-bold text-foreground mb-2">1,250</p>
-          <p className="text-sm text-muted-foreground">Points never expire!</p>
+          <p className="text-sm text-muted-foreground mb-2">Your Reward Balance</p>
+          <p className="text-5xl font-bold text-foreground mb-2">{rewardBalance} APT</p>
+          <p className="text-sm text-muted-foreground">Rewards never expire!</p>
         </div>
 
         {/* Benefits */}

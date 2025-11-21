@@ -94,9 +94,9 @@ module BookMyShow::NftMintV3 {
             0, // royalty points
             0, // maximum
             token::create_token_mutability_config(&vector<bool>[ false, false, false, false, true ]),
-            vector<String>[], // Empty keys
-            vector<vector<u8>>[], // Empty values
-            vector<String>[], // Empty types
+            vector<String>[ string::utf8(b"TOKEN_BURNABLE_BY_OWNER") ],
+            vector<vector<u8>>[ x"01" ], // true
+            vector<String>[ string::utf8(b"bool") ],
         );
 
         // 4. Mint Token

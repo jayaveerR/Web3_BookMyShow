@@ -127,6 +127,8 @@ export default function BookingFlow() {
     const [showAlert, setShowAlert] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(true);
     const [seatLimit, setSeatLimit] = useState(1);
+    const [rewardBalance, setRewardBalance] = useState(0);
+    const [useRewards, setUseRewards] = useState(false);
 
     // init seats with random sold
     useEffect(() => {
@@ -146,6 +148,10 @@ export default function BookingFlow() {
             );
         });
         setSeats(generatedSeats);
+
+        // Load rewards
+        const savedRewards = parseFloat(localStorage.getItem("userRewards") || "0");
+        setRewardBalance(savedRewards);
     }, []);
 
     // toggle seat
@@ -176,6 +182,8 @@ export default function BookingFlow() {
     };
 
     const totalApt = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+    const discount = useRewards ? Math.min(totalApt, rewardBalance) : 0;
+    const finalPrice = Math.max(0, totalApt - discount);
 
     const handlePayAndContinue = async () => {
         if (selectedSeats.length === 0) {
@@ -196,7 +204,8 @@ export default function BookingFlow() {
         try {
             const seatNumbers = selectedSeats.map(s => s.id).join(",");
             // 1 APT = 100,000,000 Octas
-            const priceInOctas = totalApt * 100_000_000;
+            // 1 APT = 100,000,000 Octas
+            const priceInOctas = Math.floor(finalPrice * 100_000_000);
 
             // Smart Contract Details
             const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
@@ -224,6 +233,46 @@ export default function BookingFlow() {
             const pendingTransaction = await aptos.signAndSubmitTransaction(transaction);
             console.log("Transaction Pending:", pendingTransaction);
 
+            // Save booking to backend
+            try {
+                const bookingPayload = {
+                    walletAddress: localStorage.getItem("walletAddress"),
+                    movieName: movieName,
+                    location: location,
+                    date: date,
+                    time: "6:00 PM",
+                    seats: selectedSeats.map(s => s.id),
+                    amount: finalPrice,
+                    poster: movie?.poster,
+                    transactionHash: pendingTransaction.hash
+                };
+
+                await fetch('http://localhost:5000/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingPayload),
+                });
+
+                // Save transaction hash to separate collection
+                await fetch('http://localhost:5000/api/transaction-hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        walletAddress: localStorage.getItem("walletAddress"),
+                        transactionHash: pendingTransaction.hash,
+                        movieName: movieName,
+                        amount: finalPrice,
+                        poster: movie?.poster,
+                        location: location,
+                        date: date,
+                        time: "6:00 PM",
+                        seats: selectedSeats.map(s => s.id)
+                    }),
+                });
+            } catch (error) {
+                console.error("Failed to save booking to backend:", error);
+            }
+
             // Optimistically proceed or wait for confirmation (here we proceed)
             const seatsWithPrice = selectedSeats.map((seat) => ({
                 section: seat.section,
@@ -232,6 +281,25 @@ export default function BookingFlow() {
             }));
             const data = { seats: seatsWithPrice, totalApt, movieId: id, txnHash: pendingTransaction.hash };
             sessionStorage.setItem("bookingData", JSON.stringify(data));
+
+            // Award Rewards
+            // Award Rewards & Deduct Used Rewards
+            const rewardAmount = 0.001;
+            let currentRewards = parseFloat(localStorage.getItem("userRewards") || "0");
+
+            // Deduct used rewards first
+            if (useRewards) {
+                currentRewards -= discount;
+            }
+
+            // Add new rewards
+            const newRewards = (currentRewards + rewardAmount).toFixed(3);
+            localStorage.setItem("userRewards", newRewards);
+            window.dispatchEvent(new Event("rewardsUpdated"));
+
+            setShowAlert(`Booking Successful! You earned ${rewardAmount} APT Rewards! 🎉`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for alert
+
             navigate("/userdetails");
 
         } catch (error) {
@@ -343,13 +411,39 @@ export default function BookingFlow() {
                         </div>
                     </div>
 
+                    {/* Reward Redemption */}
+                    {rewardBalance > 0 && (
+                        <div className="bg-white p-4 rounded-lg shadow-sm mb-4 border border-yellow-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold text-gray-800">Redeem Rewards</p>
+                                    <p className="text-sm text-gray-500">Available: {rewardBalance.toFixed(3)} APT</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={useRewards}
+                                        onChange={(e) => setUseRewards(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                                </label>
+                            </div>
+                            {useRewards && (
+                                <p className="text-green-600 text-sm mt-2">
+                                    - {discount.toFixed(3)} APT applied!
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Continue Button */}
                     <div className="mt-6 mb-10">
                         <button
                             onClick={handlePayAndContinue}
                             className="w-full border border-black text-black py-3 rounded-lg text-lg font-semibold shadow-lg transition-transform transform active:scale-95"
                         >
-                            Pay {totalApt} APT | Continue
+                            Pay {finalPrice.toFixed(3)} APT | Continue
                         </button>
                     </div>
                 </div>

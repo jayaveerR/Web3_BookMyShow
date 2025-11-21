@@ -1,7 +1,6 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap, Copy } from "lucide-react";
+import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap, Copy, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -18,15 +17,38 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [location, setLocation] = useState("Mangalagiri");
+  const [rewardBalance, setRewardBalance] = useState("0");
 
   // Check wallet connection status on mount
   useEffect(() => {
     const connected = localStorage.getItem("isWalletConnected") === "true";
     const address = localStorage.getItem("walletAddress");
+    const rewards = localStorage.getItem("userRewards") || "0";
+
     if (connected && address) {
       setIsConnected(true);
       setWalletAddress(address);
+      setRewardBalance(rewards);
+
+      // Fetch latest rewards from backend
+      fetch(`http://localhost:5000/api/rewards/${address}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setRewardBalance(data.rewards);
+            localStorage.setItem("userRewards", data.rewards);
+          }
+        })
+        .catch(err => console.error("Failed to fetch rewards:", err));
     }
+
+    const handleRewardsUpdate = () => {
+      const newRewards = localStorage.getItem("userRewards") || "0";
+      setRewardBalance(newRewards);
+    };
+
+    window.addEventListener("rewardsUpdated", handleRewardsUpdate);
+    return () => window.removeEventListener("rewardsUpdated", handleRewardsUpdate);
   }, []);
 
   const handleWalletConnect = () => {
@@ -122,12 +144,37 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             {isConnected && (
-              <Link to="/rewards">
-                <Button variant="default" className="flex items-center space-x-2">
-                  <Award className="h-4 w-4" />
-                  <span>Rewards</span>
-                </Button>
-              </Link>
+              <>
+                {/* History Button */}
+                <Link to="/history">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 text-black hover:text-primary hover:bg-black/10 transition-colors"
+                  >
+                    <Clock className="h-5 w-5" />
+                    <span className="hidden md:inline">History</span>
+                  </Button>
+                </Link>
+
+                {/* Rewards Button */}
+                <Link to="/rewards">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 text-black  hover:text-primary hover:bg-white/10 transition-colors"
+                  >
+                    <div className="relative">
+
+                    </div>
+                    <span className="hidden md:inline">Rewards: {rewardBalance} APT</span>
+                  </Button>
+                </Link>
+
+                <Link to="/refund">
+                  <Button variant="outline" className="flex items-center space-x-2 border-red-500 text-red-500 hover:bg-red-50">
+                    <span>Refund</span>
+                  </Button>
+                </Link>
+              </>
             )}
 
             {isConnected ? (
@@ -202,16 +249,25 @@ const Navbar = () => {
               <Link to="/list-your-show" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>ListYourShow</Link>
               <Link to="/corporates" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Corporates</Link>
               <Link to="/offers" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Offers</Link>
+              <Link to="/history" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>History</Link>
               <Link to="/gift-cards" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Gift Cards</Link>
             </div>
 
             {isConnected && (
-              <Link to="/rewards" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="default" className="w-full flex items-center justify-center space-x-2">
-                  <Award className="h-4 w-4" />
-                  <span>Rewards</span>
-                </Button>
-              </Link>
+              <>
+                <Link to="/history" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full flex items-center justify-center space-x-2">
+                    <Clock className="h-4 w-4" />
+                    <span>History</span>
+                  </Button>
+                </Link>
+                <Link to="/rewards" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="default" className="w-full flex items-center justify-center space-x-2">
+                    <Award className="h-4 w-4" />
+                    <span>Rewards</span>
+                  </Button>
+                </Link>
+              </>
             )}
 
             {isConnected ? (
@@ -255,36 +311,37 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12 text-sm min-w-max">
             <div className="flex items-center space-x-6 md:space-x-8 pr-4">
-              <Link to="/movies" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Clapperboard className="h-4 w-4" />
                 <span>Movies</span>
-              </Link>
-              <Link to="/stream" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Tv className="h-4 w-4" />
                 <span>Stream</span>
-              </Link>
-              <Link to="/events" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Calendar className="h-4 w-4" />
                 <span>Events</span>
-              </Link>
-              <Link to="/sports" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Trophy className="h-4 w-4" />
                 <span>Sports</span>
-              </Link>
-              <Link to="/activities" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Zap className="h-4 w-4" />
                 <span>Activities</span>
-              </Link>
-              <Link to="/buzz" className="flex items-center space-x-1 hover:text-primary transition-colors whitespace-nowrap">
+              </div>
+              <div className="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap cursor-default">
                 <Music className="h-4 w-4" />
                 <span>Buzz</span>
-              </Link>
+              </div>
             </div>
             <div className="hidden md:flex items-center space-x-6 text-xs text-muted-foreground">
-              <Link to="/list-your-show" className="hover:text-foreground transition-colors">ListYourShow</Link>
-              <Link to="/corporates" className="hover:text-foreground transition-colors">Corporates</Link>
-              <Link to="/offers" className="hover:text-foreground transition-colors">Offers</Link>
-              <Link to="/gift-cards" className="hover:text-foreground transition-colors">Gift Cards</Link>
+              <div className="hover:text-foreground transition-colors cursor-default">ListYourShow</div>
+              <div className="hover:text-foreground transition-colors cursor-default">Corporates</div>
+              <div className="hover:text-foreground transition-colors cursor-default">Offers</div>
+              <div className="hover:text-foreground transition-colors cursor-default">History</div>
+              <div className="hover:text-foreground transition-colors cursor-default">Gift Cards</div>
             </div>
           </div>
         </div>

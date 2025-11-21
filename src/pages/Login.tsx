@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Wallet } from "lucide-react";
+import { Film, Wallet, ArrowRight, Cpu } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -49,99 +50,105 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Logo and Branding */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <Film className="h-16 w-16 text-foreground" />
+    <div className="min-h-screen w-full bg-white flex flex-col items-center justify-center relative overflow-hidden selection:bg-black selection:text-white">
+
+      {/* Abstract Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ duration: 1.5 }}
+          className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-br from-gray-100 to-transparent rounded-full blur-3xl"
+        />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+          className="absolute top-[40%] -right-[10%] w-[40%] h-[40%] bg-gradient-to-bl from-gray-100 to-transparent rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="z-10 max-w-4xl w-full px-6 text-center">
+
+        {/* Logo Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="mb-12 flex justify-center"
+        >
+          <div className="w-20 h-20 bg-black rounded-2xl flex items-center justify-center shadow-2xl shadow-gray-200">
+            <Film className="h-10 w-10 text-white" />
           </div>
+        </motion.div>
 
-          <h1 className="text-4xl font-bold text-foreground mb-3">
-            BookMyShow Web3
-          </h1>
+        {/* Main Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="text-5xl md:text-7xl font-bold tracking-tighter text-black mb-6"
+        >
+          Decentralized Cinema.
+        </motion.h1>
 
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <div className="h-px w-12 bg-border"></div>
-            <p className="text-lg text-muted-foreground font-medium">
-              Annapurna Theatre
-            </p>
-            <div className="h-px w-12 bg-border"></div>
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            Mangalagiri • NFT Tickets on Aptos
+        {/* AI Tagline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="flex items-center justify-center gap-2 mb-12"
+        >
+          <Cpu className="w-5 h-5 text-gray-400" />
+          <p className="text-xl text-gray-500 font-light">
+            Powered by Next-Gen AI Implementation & Aptos Blockchain
           </p>
-        </div>
+        </motion.div>
 
-        {/* Login Card */}
-        <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">
-              Welcome Back
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Connect your Petra Wallet to continue
-            </p>
-          </div>
-
-          {/* Connect Wallet Button */}
+        {/* Connect Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+        >
           <Button
-            className="w-full h-14 text-lg"
             onClick={handleConnectWallet}
             disabled={isConnecting}
+            className="h-16 px-10 text-lg bg-black hover:bg-gray-900 text-white rounded-full transition-all hover:scale-105 hover:shadow-xl group"
           >
-            <Wallet className="h-5 w-5 mr-2" />
-            {isConnecting ? "Connecting..." : "Connect Petra Wallet"}
+            {isConnecting ? (
+              "Connecting..."
+            ) : (
+              <span className="flex items-center gap-3">
+                <Wallet className="w-5 h-5" />
+                Connect Petra Wallet
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            )}
           </Button>
+        </motion.div>
 
-          {/* Info Section */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <h3 className="font-semibold text-foreground mb-3 text-sm">
-              Why Connect Wallet?
-            </h3>
-            <ul className="text-xs text-muted-foreground space-y-2">
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Secure blockchain-powered NFT tickets</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Transfer tickets to friends seamlessly</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Earn rewards with every booking</span>
-              </li>
-              <li className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>View complete booking history on-chain</span>
-              </li>
-            </ul>
+        {/* Footer Info */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left border-t border-gray-100 pt-10"
+        >
+          <div>
+            <h3 className="font-semibold text-black mb-2">Secure</h3>
+            <p className="text-sm text-gray-400">Blockchain-backed ticketing ensures 100% authenticity.</p>
           </div>
-
-          {/* Install Petra */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground mb-2">
-              Don't have Petra Wallet?
-            </p>
-            <a
-              href="https://petra.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-foreground hover:underline font-medium"
-            >
-              Install Petra Wallet →
-            </a>
+          <div>
+            <h3 className="font-semibold text-black mb-2">Smart</h3>
+            <p className="text-sm text-gray-400">AI-driven recommendations tailored just for you.</p>
           </div>
-        </div>
+          <div>
+            <h3 className="font-semibold text-black mb-2">Seamless</h3>
+            <p className="text-sm text-gray-400">Instant refunds and transfers with zero friction.</p>
+          </div>
+        </motion.div>
 
-        {/* Footer Note */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            By connecting, you agree to our Terms of Service
-          </p>
-        </div>
       </div>
     </div>
   );

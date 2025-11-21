@@ -16,7 +16,7 @@ const UserDetails = () => {
 
     useEffect(() => {
         const data = sessionStorage.getItem("bookingData");
-        const savedWallet = localStorage.getItem("walletConnected") || "0x12a...89f";
+        const savedWallet = localStorage.getItem("walletAddress") || "";
         setWalletAddress(savedWallet);
 
         if (data) {
@@ -82,6 +82,56 @@ const UserDetails = () => {
             const pendingTransaction = await aptos.signAndSubmitTransaction(transaction);
             console.log("Mint Transaction Pending:", pendingTransaction);
 
+            // Wait for transaction confirmation using custom polling
+            toast.loading("Confirming transaction...");
+
+            const waitForTransaction = async (txnHash: string) => {
+                let attempts = 0;
+                while (attempts < 20) {
+                    try {
+                        const response = await fetch(`https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.type === "pending_transaction") {
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                                attempts++;
+                                continue;
+                            }
+                            if (data.success) {
+                                return data;
+                            } else {
+                                throw new Error("Transaction failed on-chain");
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error checking tx:", e);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    attempts++;
+                }
+                throw new Error("Transaction confirmation timed out");
+            };
+
+            const confirmedTxn = await waitForTransaction(pendingTransaction.hash);
+            toast.dismiss();
+
+            // Attempt to extract Token ID (Object Address) from changes
+            let realTokenId = "";
+            try {
+                if (confirmedTxn && confirmedTxn.changes) {
+                    const tokenChange = confirmedTxn.changes.find((change: any) =>
+                        change.type === "write_resource" &&
+                        (change.data.type.includes("0x4::token::Token") || change.data.type.includes("token::Token"))
+                    );
+                    if (tokenChange) {
+                        realTokenId = tokenChange.address;
+                        console.log("Found Token ID:", realTokenId);
+                    }
+                }
+            } catch (e) {
+                console.error("Error parsing token ID:", e);
+            }
+
             // Save final ticket data to sessionStorage for the success page
             const ticketData = {
                 ...bookingData,
@@ -92,7 +142,9 @@ const UserDetails = () => {
                 time: time,
                 wallet: walletAddress,
                 txnHash: pendingTransaction.hash,
-                nftMetadata: metadataIpfsUrl
+                tokenId: realTokenId, // Store the real ID
+                nftMetadata: metadataIpfsUrl,
+                seats: seatsString // Ensure seats string is passed
             };
             sessionStorage.setItem("ticketData", JSON.stringify(ticketData));
 
@@ -101,10 +153,10 @@ const UserDetails = () => {
                 navigate("/ticket-success");
             }, 1500);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Minting failed", error);
             toast.dismiss();
-            toast.error("Minting Failed! Please try again.");
+            toast.error(`Minting Failed: ${error.message || "Unknown error"}`);
         }
     };
 
