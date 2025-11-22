@@ -208,7 +208,7 @@ export default function BookingFlow() {
             const priceInOctas = Math.floor(finalPrice * 100_000_000);
 
             // Smart Contract Details
-            const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
+            const moduleAddress = import.meta.env.VITE_APTOS_ADDRESS;
             const treasuryAddress = "0x7d467845ae28ea6b0adf38546c6fd0a1ba70733ed825a10c32d5a456bedb7d46";
 
             // Get movie details
@@ -247,14 +247,14 @@ export default function BookingFlow() {
                     transactionHash: pendingTransaction.hash
                 };
 
-                await fetch('http://localhost:5000/api/bookings', {
+                await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingPayload),
                 });
 
                 // Save transaction hash to separate collection
-                await fetch('http://localhost:5000/api/transaction-hash', {
+                await fetch(`${import.meta.env.VITE_API_URL}/api/transaction-hash`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

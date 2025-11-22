@@ -34,7 +34,7 @@ const TicketSuccess = () => {
 
   const saveNftToBackend = async (data: any) => {
     try {
-      await fetch('http://localhost:5000/api/nft-minting', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/nft-minting`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -52,7 +52,7 @@ const TicketSuccess = () => {
       });
 
       // Also save to general Transaction History
-      await fetch('http://localhost:5000/api/transaction-hash', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/transaction-hash`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

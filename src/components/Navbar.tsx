@@ -31,7 +31,7 @@ const Navbar = () => {
       setRewardBalance(rewards);
 
       // Fetch latest rewards from backend
-      fetch(`http://localhost:5000/api/rewards/${address}`)
+      fetch(`${import.meta.env.VITE_API_URL}/api/rewards/${address}`)
         .then(res => res.json())
         .then(data => {
           if (data.success) {

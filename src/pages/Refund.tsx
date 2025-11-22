@@ -45,7 +45,7 @@ const Refund = () => {
         setIsLoading(true);
         try {
             // 1. Check if refund already exists in backend
-            const checkResponse = await fetch(`http://localhost:5000/api/refund/check/${txHash}`);
+            const checkResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/refund/check/${txHash}`);
             if (checkResponse.ok) {
                 const checkData = await checkResponse.json();
                 if (checkData.exists) {
@@ -188,7 +188,7 @@ const Refund = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/refund', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/refund`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

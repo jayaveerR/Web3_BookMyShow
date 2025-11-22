@@ -11,7 +11,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load .env from project root (one level up from backend)
+// Load .env from project root (one level up from backend) for local dev
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Also try loading from current directory (standard behavior)
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

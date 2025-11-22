@@ -53,14 +53,14 @@ const BookingHistory = () => {
 
       try {
         // Fetch Bookings
-        const bookingsResponse = await fetch(`http://localhost:5000/api/bookings/${walletAddress}`);
+        const bookingsResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${walletAddress}`);
         if (bookingsResponse.ok) {
           const bookingsData = await bookingsResponse.json();
           setBookings(bookingsData);
         }
 
         // Fetch Refunds
-        const refundsResponse = await fetch(`http://localhost:5000/api/refunds/${walletAddress}`);
+        const refundsResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/refunds/${walletAddress}`);
         if (refundsResponse.ok) {
           const refundsData = await refundsResponse.json();
           setRefunds(refundsData);

@@ -64,7 +64,7 @@ const UserDetails = () => {
             toast.dismiss();
 
             // 4. Mint NFT
-            const moduleAddress = "0xeeccc2d73cad08f9be2e6b3c3d394b3677bdff0350b68ec45f95b3bcaec1f8b1";
+            const moduleAddress = import.meta.env.VITE_APTOS_ADDRESS;
 
             const transaction = {
                 function: `${moduleAddress}::NftMintV3::mint_ticket`,
