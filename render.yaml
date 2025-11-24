@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: bookmyshow-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MANGO_DB
+        sync: false
+
+  - type: static
+    name: bookmyshow-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: bookmyshow-backend
+          property: url
