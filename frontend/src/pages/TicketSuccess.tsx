@@ -52,23 +52,7 @@ const TicketSuccess = () => {
         }),
       });
 
-      // Also save to general Transaction History
-      await fetch(`${import.meta.env.VITE_API_URL}/api/transaction-hash`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          walletAddress: data.wallet,
-          transactionHash: data.txnHash,
-          movieName: data.movieTitle + " (NFT Mint)",
-          amount: 0,
-          poster: data.moviePoster,
-          location: data.location,
-          date: data.date,
-          time: data.time,
-          seats: data.seats,
-          tokenId: data.tokenId // Send Token ID
-        }),
-      });
+
       // Also save to Transfer History (for Transaction History page)
       await fetch(`${import.meta.env.VITE_API_URL}/api/transfers`, {
         method: 'POST',

@@ -60,26 +60,26 @@ function SeatPopup({
 
     return (
         <motion.div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
         >
             <motion.div
-                className="relative max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 text-center"
+                className="relative w-full max-w-sm sm:max-w-md mx-auto bg-white rounded-xl shadow-lg p-4 sm:p-6 text-center"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
             >
-                <h2 className="text-lg font-semibold mb-4">How many seats?</h2>
-                <div className="mb-4">
-                    <img src={seatImages[currentImg]} alt="transport" className="w-32 h-32 mx-auto object-contain" />
+                <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">How many seats?</h2>
+                <div className="mb-3 sm:mb-4">
+                    <img src={seatImages[currentImg]} alt="transport" className="w-24 h-24 sm:w-32 sm:h-32 mx-auto object-contain" />
                 </div>
-                <div className="flex justify-center gap-4 mb-4">
+                <div className="flex justify-center gap-2 sm:gap-4 mb-3 sm:mb-4 overflow-x-auto">
                     {transportNames.map((name, index) => (
                         <button
                             key={index}
                             onClick={() => handleTransportChange(index)}
-                            className={`text-base font-normal px-2 py-1 border-b-2 transition ${currentImg === index
+                            className={`text-sm sm:text-base font-normal px-2 py-1 border-b-2 transition whitespace-nowrap ${currentImg === index
                                 ? "border-red-500 text-red-500"
                                 : "border-transparent text-gray-700 hover:text-black"
                                 }`}
@@ -88,28 +88,27 @@ function SeatPopup({
                         </button>
                     ))}
                 </div>
-                {/* Premium Options */}{" "}
-                <div className="flex justify-between border-t border-gray-200 pt-4 mb-4 text-sm">
-                    {" "}
-                    <div>
-                        {" "}
-                        <p className="font-semibold">PREMIUM BALCONY</p> <p className="text-gray-600">1 APT</p>{" "}
-                        <p className="text-yellow-500">FILLING FAST</p>{" "}
-                    </div>{" "}
-                    <div>
-                        {" "}
-                        <p className="font-semibold">PREMIUM SOFA</p> <p className="text-gray-600">1 APT</p>{" "}
-                        <p className="text-green-500">AVAILABLE</p>{" "}
-                    </div>{" "}
-                    <div>
-                        {" "}
-                        <p className="font-semibold">PREMIUM FIRST CLASS</p> <p className="text-gray-600">1 APT</p>{" "}
-                        <p className="text-green-500">AVAILABLE</p>{" "}
-                    </div>{" "}
+                {/* Premium Options */}
+                <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4 border-t border-gray-200 pt-3 sm:pt-4 mb-3 sm:mb-4 text-xs sm:text-sm">
+                    <div className="text-center sm:text-left">
+                        <p className="font-semibold">PREMIUM BALCONY</p>
+                        <p className="text-gray-600">1 APT</p>
+                        <p className="text-yellow-500">FILLING FAST</p>
+                    </div>
+                    <div className="text-center sm:text-left">
+                        <p className="font-semibold">PREMIUM SOFA</p>
+                        <p className="text-gray-600">1 APT</p>
+                        <p className="text-green-500">AVAILABLE</p>
+                    </div>
+                    <div className="text-center sm:text-left">
+                        <p className="font-semibold">PREMIUM FIRST CLASS</p>
+                        <p className="text-gray-600">1 APT</p>
+                        <p className="text-green-500">AVAILABLE</p>
+                    </div>
                 </div>
                 <button
                     onClick={onClose}
-                    className="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition"
+                    className="w-full bg-red-500 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-red-600 transition"
                 >
                     Select Seats
                 </button>
@@ -129,30 +128,61 @@ export default function BookingFlow() {
     const [seatLimit, setSeatLimit] = useState(1);
     const [rewardBalance, setRewardBalance] = useState(0);
     const [useRewards, setUseRewards] = useState(false);
+    const [isLoadingSeats, setIsLoadingSeats] = useState(true);
 
-    // init seats with random sold
+    // init seats and fetch booked seats from backend
     useEffect(() => {
-        const generatedSeats: Record<string, Seat[]> = {};
-        sections.forEach((section) => {
-            generatedSeats[section.name] = section.rows.flatMap((row) =>
-                Array.from({ length: section.seatsPerRow }, (_, i) => {
-                    const seatId = `${row}${i + 1}`;
-                    const isSold = Math.random() < 0.2; // 20% random sold
-                    return {
-                        id: seatId,
-                        status: isSold ? "sold" : "available",
-                        section: section.name,
-                        price: section.apt,
-                    };
-                })
-            );
-        });
-        setSeats(generatedSeats);
+        const fetchBookedSeats = async () => {
+            setIsLoadingSeats(true);
+            const generatedSeats: Record<string, Seat[]> = {};
+
+            // Get movie details
+            const movie = movies.find((m) => m.id === Number(id));
+            const movieName = movie ? movie.title : "Unknown Movie";
+            const date = getCurrentDateIST();
+            const time = "6:00 PM"; // Default time, you can make this dynamic
+
+            // Fetch booked seats from backend
+            let bookedSeatIds: string[] = [];
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL}/api/booked-seats/${encodeURIComponent(movieName)}/${encodeURIComponent(date)}/${encodeURIComponent(time)}`
+                );
+                if (response.ok) {
+                    const data = await response.json();
+                    bookedSeatIds = data.bookedSeats || [];
+                    console.log('Booked seats from backend:', bookedSeatIds);
+                }
+            } catch (error) {
+                console.error('Error fetching booked seats:', error);
+            }
+
+            // Generate seats with booked seats marked as sold
+            sections.forEach((section) => {
+                generatedSeats[section.name] = section.rows.flatMap((row) =>
+                    Array.from({ length: section.seatsPerRow }, (_, i) => {
+                        const seatId = `${row}${i + 1}`;
+                        // Check if this seat is already booked
+                        const isBooked = bookedSeatIds.includes(seatId);
+                        return {
+                            id: seatId,
+                            status: isBooked ? "sold" : "available",
+                            section: section.name,
+                            price: section.apt,
+                        };
+                    })
+                );
+            });
+            setSeats(generatedSeats);
+            setIsLoadingSeats(false);
+        };
+
+        fetchBookedSeats();
 
         // Load rewards
         const savedRewards = parseFloat(localStorage.getItem("userRewards") || "0");
         setRewardBalance(savedRewards);
-    }, []);
+    }, [id]);
 
     // toggle seat
     const toggleSeat = (sectionName: string, seatId: string) => {
@@ -322,102 +352,113 @@ export default function BookingFlow() {
 
             {/* Seat Layout */}
             {!showPopup && (
-                <div className="max-w-6xl mx-auto p-4 pt-28">
+                <div className="max-w-6xl mx-auto p-3 sm:p-4 pt-20 sm:pt-24 md:pt-28">
                     {/* Movie Screen */}
-                    <div className="mb-6 flex justify-center">
+                    <div className="mb-4 sm:mb-6 flex justify-center">
                         <img
                             src="https://cdn-icons-png.flaticon.com/512/7994/7994691.png"
                             alt="Movie Screen"
-                            className="h-12 object-contain"
+                            className="h-8 sm:h-10 md:h-12 object-contain"
                         />
                     </div>
 
                     {/* Edit Ticket Button - Moved to Top */}
-                    <div className="flex justify-end mb-4 px-4">
+                    <div className="flex justify-end mb-3 sm:mb-4 px-2 sm:px-4">
                         <button
                             onClick={() => setShowPopup(true)}
-                            className="text-sm flex items-center gap-2 text-red-500 border border-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition"
+                            className="text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 text-red-500 border border-red-500 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-50 transition"
                         >
-                            <span className="text-lg">✎</span> Edit Ticket
+                            <span className="text-base sm:text-lg">✎</span> Edit Ticket
                         </button>
                     </div>
 
-                    {sections.map((section) => (
-                        <div key={section.name} className="mb-8">
-                            <h2 className="text-center text-sm text-gray-700 mb-2">
-                                {section.name} • {section.apt} APT
-                            </h2>
-                            <div className="space-y-2">
-                                {section.rows.map((row) => (
-                                    <div key={row} className="flex items-center justify-center gap-3">
-                                        <span className="w-6 text-xs text-gray-600">{row}</span>
-                                        <div className="flex gap-6">
-                                            <div className="flex gap-1">
-                                                {seats[section.name]
-                                                    ?.filter((s) => s.id.startsWith(row))
-                                                    .slice(0, 9)
-                                                    .map((seat) => (
-                                                        <button
-                                                            key={seat.id}
-                                                            onClick={() => toggleSeat(section.name, seat.id)}
-                                                            className={`w-7 h-7 rounded-sm text-[10px] flex items-center justify-center border ${seat.status === "available"
-                                                                ? "bg-white border-green-400 text-green-600 hover:bg-green-100"
-                                                                : seat.status === "selected"
-                                                                    ? "bg-green-500 text-white"
-                                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                                }`}
-                                                        >
-                                                            {seat.id.replace(row, "")}
-                                                        </button>
-                                                    ))}
-                                            </div>
-                                            <div className="flex gap-1">
-                                                {seats[section.name]
-                                                    ?.filter((s) => s.id.startsWith(row))
-                                                    .slice(9)
-                                                    .map((seat) => (
-                                                        <button
-                                                            key={seat.id}
-                                                            onClick={() => toggleSeat(section.name, seat.id)}
-                                                            className={`w-7 h-7 rounded-sm text-[10px] flex items-center justify-center border ${seat.status === "available"
-                                                                ? "bg-white border-green-400 text-green-600 hover:bg-green-100"
-                                                                : seat.status === "selected"
-                                                                    ? "bg-green-500 text-white"
-                                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                                }`}
-                                                        >
-                                                            {seat.id.replace(row, "")}
-                                                        </button>
-                                                    ))}
-                                            </div>
-                                        </div>
-                                        <span className="w-6 text-xs text-gray-600">{row}</span>
-                                    </div>
-                                ))}
-                            </div>
+                    {isLoadingSeats ? (
+                        <div className="flex justify-center items-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
                         </div>
-                    ))}
+                    ) : (
+
+
+                        sections.map((section) => (
+                            <div key={section.name} className="mb-6 sm:mb-8">
+                                <h2 className="text-center text-xs sm:text-sm text-gray-700 mb-2">
+                                    {section.name} • {section.apt} APT
+                                </h2>
+                                <div className="space-y-1.5 sm:space-y-2">
+                                    {section.rows.map((row) => (
+                                        <div key={row} className="flex items-center justify-center gap-2 sm:gap-3">
+                                            <span className="w-4 sm:w-6 text-[10px] sm:text-xs text-gray-600">{row}</span>
+                                            <div className="flex gap-3 sm:gap-6">
+                                                <div className="flex gap-0.5 sm:gap-1">
+                                                    {seats[section.name]
+                                                        ?.filter((s) => s.id.startsWith(row))
+                                                        .slice(0, 9)
+                                                        .map((seat) => (
+                                                            <button
+                                                                key={seat.id}
+                                                                onClick={() => toggleSeat(section.name, seat.id)}
+                                                                className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-sm text-[8px] sm:text-[10px] flex items-center justify-center border transition-colors ${seat.status === "available"
+                                                                    ? "bg-white border-green-400 text-green-600 hover:bg-green-100"
+                                                                    : seat.status === "selected"
+                                                                        ? "bg-green-500 text-white"
+                                                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                    }`}
+                                                                disabled={seat.status === "sold"}
+                                                            >
+                                                                {seat.id.replace(row, "")}
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                                <div className="flex gap-0.5 sm:gap-1">
+                                                    {seats[section.name]
+                                                        ?.filter((s) => s.id.startsWith(row))
+                                                        .slice(9)
+                                                        .map((seat) => (
+                                                            <button
+                                                                key={seat.id}
+                                                                onClick={() => toggleSeat(section.name, seat.id)}
+                                                                className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-sm text-[8px] sm:text-[10px] flex items-center justify-center border transition-colors ${seat.status === "available"
+                                                                    ? "bg-white border-green-400 text-green-600 hover:bg-green-100"
+                                                                    : seat.status === "selected"
+                                                                        ? "bg-green-500 text-white"
+                                                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                    }`}
+                                                                disabled={seat.status === "sold"}
+                                                            >
+                                                                {seat.id.replace(row, "")}
+                                                            </button>
+                                                        ))}
+                                                </div>
+                                            </div>
+                                            <span className="w-4 sm:w-6 text-[10px] sm:text-xs text-gray-600">{row}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+
+                    )}
 
                     {/* Legend */}
-                    <div className="flex justify-center gap-6 mt-6 mb-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 bg-white border-green-400 border"></span> Available
+                    <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-3 sm:mb-4 text-xs sm:text-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="w-4 h-4 sm:w-5 sm:h-5 bg-white border-green-400 border"></span> Available
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 bg-green-500"></span> Selected
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="w-4 h-4 sm:w-5 sm:h-5 bg-green-500"></span> Selected
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 bg-gray-300"></span> Sold
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <span className="w-4 h-4 sm:w-5 sm:h-5 bg-gray-300"></span> Sold
                         </div>
                     </div>
 
                     {/* Reward Redemption */}
                     {rewardBalance > 0 && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm mb-4 border border-yellow-200">
+                        <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm mb-3 sm:mb-4 border border-yellow-200">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-semibold text-gray-800">Redeem Rewards</p>
-                                    <p className="text-sm text-gray-500">Available: {rewardBalance.toFixed(3)} APT</p>
+                                    <p className="text-sm sm:text-base font-semibold text-gray-800">Redeem Rewards</p>
+                                    <p className="text-xs sm:text-sm text-gray-500">Available: {rewardBalance.toFixed(3)} APT</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
@@ -438,10 +479,10 @@ export default function BookingFlow() {
                     )}
 
                     {/* Continue Button */}
-                    <div className="mt-6 mb-10">
+                    <div className="mt-4 sm:mt-6 mb-8 sm:mb-10">
                         <button
                             onClick={handlePayAndContinue}
-                            className="w-full border border-black text-black py-3 rounded-lg text-lg font-semibold shadow-lg transition-transform transform active:scale-95"
+                            className="w-full border border-black text-black py-2.5 sm:py-3 rounded-lg text-base sm:text-lg font-semibold shadow-lg transition-transform transform active:scale-95 hover:bg-black hover:text-white"
                         >
                             Pay {finalPrice.toFixed(3)} APT | Continue
                         </button>
@@ -456,7 +497,7 @@ export default function BookingFlow() {
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 50, opacity: 0 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-lg shadow"
+                        className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-3 sm:px-4 py-2 rounded-lg shadow text-sm sm:text-base max-w-[90%] sm:max-w-md text-center"
                     >
                         {showAlert}
                     </motion.div>

@@ -141,17 +141,17 @@ const BookingHistory = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      <div className="max-w-6xl mx-auto pt-24 px-4 pb-12">
-        <h1 className="text-3xl font-bold mb-2">My Activity</h1>
-        <p className="text-sm text-muted-foreground mb-8 font-mono">
+      <div className="max-w-6xl mx-auto pt-20 sm:pt-24 px-4 sm:px-6 lg:px-8 pb-12">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">My Activity</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8 font-mono break-all">
           Connected Wallet: {localStorage.getItem("walletAddress") || "Not Connected"}
         </p>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-border overflow-x-auto">
+        <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-border overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`pb-2 px-4 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'bookings' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            className={`pb-2 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'bookings' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             Bookings
@@ -161,7 +161,7 @@ const BookingHistory = () => {
           </button>
           <button
             onClick={() => setActiveTab('refunds')}
-            className={`pb-2 px-4 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'refunds' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            className={`pb-2 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'refunds' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             Refunds
@@ -171,7 +171,7 @@ const BookingHistory = () => {
           </button>
           <button
             onClick={() => setActiveTab('transactions')}
-            className={`pb-2 px-4 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'transactions' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            className={`pb-2 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'transactions' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             Transaction History
@@ -181,7 +181,7 @@ const BookingHistory = () => {
           </button>
           <button
             onClick={() => setActiveTab('nftMinting')}
-            className={`pb-2 px-4 text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'nftMinting' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            className={`pb-2 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-colors relative whitespace-nowrap ${activeTab === 'nftMinting' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             NFT Minting
@@ -205,32 +205,32 @@ const BookingHistory = () => {
                     key={booking._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-lg border border-border p-6 flex gap-6 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-card rounded-lg border border-border p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="w-24 h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
+                    <div className="w-full sm:w-24 h-48 sm:h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
                       <img src={booking.poster} alt={booking.movieName} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-semibold mb-2">{booking.movieName}</h3>
-                          <p className="text-muted-foreground text-sm mb-1">{booking.location}</p>
-                          <p className="text-muted-foreground text-sm mb-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{booking.movieName}</h3>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-1">{booking.location}</p>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                             {booking.date} at {booking.time}
                           </p>
                           <p className="text-xs font-mono font-bold text-primary bg-primary/10 inline-block px-2 py-1 rounded break-all">
                             ID: {booking.tokenId ? booking.tokenId : `#NFT-${booking.transactionHash.slice(-6).toUpperCase()}`}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
                             Confirmed
                           </span>
                         </div>
                       </div>
-                      <div className="flex justify-between items-end mt-4 pt-4 border-t border-border">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mt-4 pt-4 border-t border-border">
                         <div>
-                          <p className="text-sm font-medium">Seats: {booking.seats.join(", ")}</p>
+                          <p className="text-xs sm:text-sm font-medium">Seats: {booking.seats.join(", ")}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground font-mono">
                               Tx: {booking.transactionHash.slice(0, 6)}...{booking.transactionHash.slice(-4)}
@@ -244,7 +244,7 @@ const BookingHistory = () => {
                             </button>
                           </div>
                         </div>
-                        <p className="text-lg font-bold">{booking.amount} APT</p>
+                        <p className="text-base sm:text-lg font-bold">{booking.amount} APT</p>
                       </div>
                     </div>
                   </motion.div>
@@ -264,10 +264,10 @@ const BookingHistory = () => {
                     key={refund._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-lg border border-border p-6 flex gap-6 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-card rounded-lg border border-border p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-shadow"
                   >
                     {/* Movie Poster */}
-                    <div className="w-24 h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
+                    <div className="w-full sm:w-24 h-48 sm:h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
                       <img
                         src={refund.poster?.startsWith('ipfs://')
                           ? refund.poster.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/')
@@ -278,15 +278,15 @@ const BookingHistory = () => {
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-semibold mb-2">{refund.movieName}</h3>
-                          <p className="text-muted-foreground text-sm mb-1">{refund.location || "Location N/A"}</p>
-                          <p className="text-muted-foreground text-sm mb-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{refund.movieName}</h3>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-1">{refund.location || "Location N/A"}</p>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
                             {refund.date || "Date N/A"} at {refund.time || "Time N/A"}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${refund.status === 'Processed' ? 'bg-green-100 text-green-800' :
                             refund.status === 'Rejected' ? 'bg-red-100 text-red-800' :
                               'bg-yellow-100 text-yellow-800'
@@ -296,9 +296,9 @@ const BookingHistory = () => {
                         </div>
                       </div>
 
-                      <div className="flex justify-between items-end mt-4 pt-4 border-t border-border">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mt-4 pt-4 border-t border-border">
                         <div>
-                          <p className="text-sm font-medium">Seats: {refund.seats || "N/A"}</p>
+                          <p className="text-xs sm:text-sm font-medium">Seats: {refund.seats || "N/A"}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-xs text-muted-foreground font-mono">
                               Tx: {refund.transactionHash.slice(0, 6)}...{refund.transactionHash.slice(-4)}
@@ -312,7 +312,7 @@ const BookingHistory = () => {
                             </button>
                           </div>
                         </div>
-                        <p className="text-lg font-bold">{refund.amount} APT</p>
+                        <p className="text-base sm:text-lg font-bold">{refund.amount} APT</p>
                       </div>
                     </div>
                   </motion.div>
@@ -326,23 +326,23 @@ const BookingHistory = () => {
 
             {/* Transactions Tab */}
             {activeTab === 'transactions' && (
-              transactions.length > 0 ? (
-                transactions.map((tx) => (
+              transactions.filter(tx => tx.amount > 0 && !tx.movieName?.includes("(NFT Mint)")).length > 0 ? (
+                transactions.filter(tx => tx.amount > 0 && !tx.movieName?.includes("(NFT Mint)")).map((tx) => (
                   <motion.div
                     key={tx._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-lg border border-border p-6 flex gap-6 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-card rounded-lg border border-border p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="w-24 h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
+                    <div className="w-full sm:w-24 h-48 sm:h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
                       <img src={tx.poster} alt={tx.movieName} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-semibold mb-2">{tx.movieName}</h3>
-                          <p className="text-muted-foreground text-sm mb-1">{tx.location}</p>
-                          <p className="text-muted-foreground text-sm mb-2">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{tx.movieName}</h3>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-1">{tx.location}</p>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-2">
                             {tx.date} • {tx.time}
                           </p>
                           <div className="flex items-center gap-2">
@@ -352,17 +352,17 @@ const BookingHistory = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">{tx.amount} APT</p>
+                        <div className="text-left sm:text-right">
+                          <p className="text-base sm:text-lg font-bold">{tx.amount} APT</p>
                           <p className="text-xs text-muted-foreground mt-1">{formatDate(tx.createdAt)}</p>
                         </div>
                       </div>
 
-                      <div className="flex justify-between items-end mt-4 pt-4 border-t border-border">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mt-4 pt-4 border-t border-border">
                         <div className="text-sm">
-                          <p className="text-sm font-medium">Seats: {Array.isArray(tx.seats) ? tx.seats.join(", ") : tx.seats}</p>
+                          <p className="text-xs sm:text-sm font-medium">Seats: {Array.isArray(tx.seats) ? tx.seats.join(", ") : tx.seats}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <a
                             href={`https://explorer.aptoslabs.com/txn/${tx.transactionHash}?network=testnet`}
                             target="_blank"
@@ -398,17 +398,17 @@ const BookingHistory = () => {
                     key={mint._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-lg border border-border p-6 flex gap-6 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-card rounded-lg border border-border p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="w-24 h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
+                    <div className="w-full sm:w-24 h-48 sm:h-36 flex-shrink-0 bg-muted rounded-md overflow-hidden">
                       <img src={mint.poster} alt={mint.movieName} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-semibold mb-2">{mint.movieName}</h3>
-                          <p className="text-muted-foreground text-sm mb-1">{mint.location}</p>
-                          <p className="text-muted-foreground text-sm mb-2">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{mint.movieName}</h3>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-1">{mint.location}</p>
+                          <p className="text-muted-foreground text-xs sm:text-sm mb-2">
                             {mint.date} • {mint.time}
                           </p>
                           <div className="flex items-center gap-2">
@@ -418,18 +418,18 @@ const BookingHistory = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold">{mint.price || 0} APT</p>
+                        <div className="text-left sm:text-right">
+                          <p className="text-base sm:text-lg font-bold">{mint.price || 0} APT</p>
                           <p className="text-xs text-muted-foreground mt-1">{formatDate(mint.createdAt)}</p>
                         </div>
                       </div>
 
-                      <div className="flex justify-between items-end mt-4 pt-4 border-t border-border">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 mt-4 pt-4 border-t border-border">
                         <div className="text-sm">
-                          <p className="text-sm font-medium">Seats: {Array.isArray(mint.seats) ? mint.seats.join(", ") : mint.seats}</p>
-                          <p className="text-xs text-muted-foreground font-mono mt-1">Token ID: {mint.tokenId}</p>
+                          <p className="text-xs sm:text-sm font-medium">Seats: {Array.isArray(mint.seats) ? mint.seats.join(", ") : mint.seats}</p>
+                          <p className="text-xs text-muted-foreground font-mono mt-1 break-all">Token ID: {mint.tokenId}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <a
                             href={`https://explorer.aptoslabs.com/txn/${mint.transactionHash}?network=testnet`}
                             target="_blank"

@@ -91,6 +91,28 @@ app.get('/api/bookings/:walletAddress', async (req, res) => {
     }
 });
 
+// Get Booked Seats for a specific movie, date, and time
+app.get('/api/booked-seats/:movieName/:date/:time', async (req, res) => {
+    try {
+        const { movieName, date, time } = req.params;
+
+        // Find all bookings for this movie, date, and time
+        const bookings = await Booking.find({
+            movieName: decodeURIComponent(movieName),
+            date: decodeURIComponent(date),
+            time: decodeURIComponent(time)
+        });
+
+        // Extract all booked seat IDs
+        const bookedSeats = bookings.flatMap(booking => booking.seats || []);
+
+        res.json({ bookedSeats });
+    } catch (error) {
+        console.error('Error fetching booked seats:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+
 // Save Refund Request
 app.post('/api/refund', async (req, res) => {
     try {
