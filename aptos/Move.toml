@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-BookMyShow = "_"    
+BookMyShow = "0x48c9b0df9c2f11a4d627a975cb0d88933ba0d68093bdde8b1c423621fe4f607b"  
 
 [dev-addresses]
 
