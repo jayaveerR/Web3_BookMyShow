@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import TransactionHashCode from './transaction.js';
+import transferHistoryRoutes from './routes/transferHistory.js';
+import NFTMinting from './models/NFTMinting.js';
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -164,6 +166,66 @@ app.get('/api/transaction-hash/:walletAddress', async (req, res) => {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
+
+
+
+// NFT Minting Routes
+
+// Save NFT Minting Transaction
+app.post('/api/nft-minting', async (req, res) => {
+    try {
+        const {
+            walletAddress,
+            transactionHash,
+            tokenId,
+            movieName,
+            poster,
+            location,
+            date,
+            time,
+            seats,
+            price
+        } = req.body;
+
+        // Check if already exists
+        const existingMint = await NFTMinting.findOne({ transactionHash });
+        if (existingMint) {
+            return res.status(400).json({ message: 'NFT Minting already recorded for this transaction' });
+        }
+
+        const newMint = new NFTMinting({
+            walletAddress,
+            transactionHash,
+            tokenId,
+            movieName,
+            poster,
+            location,
+            date,
+            time,
+            seats,
+            price
+        });
+
+        await newMint.save();
+        res.status(201).json({ message: 'NFT Minting recorded successfully', nftMinting: newMint });
+    } catch (error) {
+        console.error('Error recording NFT Minting:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+
+// Get NFT Minting History by Wallet
+app.get('/api/nft-minting/:walletAddress', async (req, res) => {
+    try {
+        const mints = await NFTMinting.find({ walletAddress: req.params.walletAddress }).sort({ createdAt: -1 });
+        res.json(mints);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+
+// Transfer History Routes
+app.use('/api/transfers', transferHistoryRoutes);
 
 
 

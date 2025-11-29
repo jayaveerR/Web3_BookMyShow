@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap, Copy, Clock } from "lucide-react";
+import { Film, Award, Menu, X, LogOut, Search, MapPin, Clapperboard, Tv, Music, Trophy, Calendar, Zap, Copy, Clock, Send, History } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -174,6 +174,13 @@ const Navbar = () => {
                     <span>Refund</span>
                   </Button>
                 </Link>
+                <Link to="/transfer">
+                  <Button variant="ghost" className="flex items-center gap-2 text-black hover:text-primary hover:bg-black/10 transition-colors">
+                    <Send className="h-5 w-5" />
+                    <span className="hidden md:inline">Transfer</span>
+                  </Button>
+                </Link>
+
               </>
             )}
 
@@ -249,7 +256,6 @@ const Navbar = () => {
               <Link to="/list-your-show" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>ListYourShow</Link>
               <Link to="/corporates" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Corporates</Link>
               <Link to="/offers" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Offers</Link>
-              <Link to="/history" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>History</Link>
               <Link to="/gift-cards" className="block py-2 hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Gift Cards</Link>
             </div>
 
@@ -265,6 +271,17 @@ const Navbar = () => {
                   <Button variant="default" className="w-full flex items-center justify-center space-x-2">
                     <Award className="h-4 w-4" />
                     <span>Rewards</span>
+                  </Button>
+                </Link>
+                <Link to="/refund" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full flex items-center justify-center space-x-2 border-red-500 text-red-500 hover:bg-red-50">
+                    <span>Refund</span>
+                  </Button>
+                </Link>
+                <Link to="/transfer" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
+                    <Send className="h-4 w-4" />
+                    <span>Transfer</span>
                   </Button>
                 </Link>
               </>

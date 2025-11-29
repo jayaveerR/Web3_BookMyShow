@@ -47,7 +47,8 @@ const TicketSuccess = () => {
           date: data.date,
           time: data.time,
           location: data.location,
-          tokenId: data.tokenId // Send Token ID
+          tokenId: data.tokenId || `NFT-${data.txnHash?.slice(-8).toUpperCase()}`, // Send Token ID or fallback
+          price: data.totalApt || 0
         }),
       });
 
@@ -68,8 +69,30 @@ const TicketSuccess = () => {
           tokenId: data.tokenId // Send Token ID
         }),
       });
+      // Also save to Transfer History (for Transaction History page)
+      await fetch(`${import.meta.env.VITE_API_URL}/api/transfers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactionHash: data.txnHash,
+          from: "0x0000000000000000000000000000000000000000000000000000000000000000", // Minted from null address
+          to: data.wallet,
+          tokenId: data.tokenId,
+          movieName: data.movieTitle,
+          seats: Array.isArray(data.seats) ? data.seats.map((s: any) => s.id || s).join(", ") : data.seats,
+          poster: data.moviePoster,
+          location: data.location,
+          date: data.date,
+          time: data.time,
+          transferType: 'gift', // Minting treated as a gift/receive
+          price: data.totalApt || 0,
+          commission: 0,
+          status: 'completed'
+        }),
+      });
+
       sessionStorage.setItem("nftSaved", "true");
-      console.log("NFT details saved to MongoDB");
+      console.log("NFT details saved to MongoDB and Transfer History");
     } catch (error) {
       console.error("Failed to save NFT details:", error);
     }
